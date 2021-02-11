@@ -2,47 +2,45 @@ import $ from 'jquery';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './css/styles.css';
+import WeatherService from './weather-service.js'
 
-// function convertKToF (temp) {
-//   return 1.8 * (temp - 273) +32
-// }
+function clearFields() {
+  $('#location').val("");
+  $('.showErrors').text("");
+  $('.showHumidity').text("");
+  $('.showTemp').text("");
+}
+
+function getElements(response) {
+  if (response.main) {
+    $('.showHumidity').text(`The humidity in ${response.name} is ${response.main.humidity}%`);
+    $('.showTemp').text(`The temperature in Kelvins is ${response.main.temp} degrees.`);
+  } else {
+    $('.showErrors').text(`There was an error: ${response.message}`);
+  }
+}
+
+async function makeApiCall(city) {
+  const response = await WeatherService.getWeather(city);
+  getElements(response);
+}
+
+
 $(document).ready(function() {
   $('#weatherLocation').click(function() {
-    const city = $('#location').val();
-    $('#location').val("");
-
-    let request = new XMLHttpRequest();
-    const url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${process.env.API_KEY}`;
-
-    request.onreadystatechange = function() {
-      if (this.readyState === 4 && this.status === 200) {
-        const response = JSON.parse(this.responseText);
-        console.log(response);
-        getElements(response);
-      }
-    }
-
-    request.open("GET", url, true);
-    request.send();
-
-    function getElements(response) {
-      $(".celsius-btn").show();
-      $('.showHumidity').text(`The humidity in ${city} is ${response.main.humidity}%`);
-      $('.showTemp').text(`The temperature in Fahrenheit is ${(1.8 * (response.main.temp - 273) + 32).toFixed(2)} degrees.`);
-      $('.showWeather').text(`The current weather condition is ${response.weather[0].description}! `)
-      $('.showWind').text(`The wind speed is ${2.237 * (response.wind.speed)} MPH.`);
-
-      $(".celsius-btn").click(() => {
-        $(".fahrenheit-btn").show();
-        $(".celsius-btn").hide();
-        $('.showTemp').text(`The temperature in Celsius is ${(response.main.temp - 273).toFixed(2)} degrees.`);
-      });
-  
-      $(".fahrenheit-btn").click(() => {
-        $(".celsius-btn").show();
-        $(".fahrenheit-btn").hide();
-        $('.showTemp').text(`The temperature in Fahrenheit is ${(1.8 * (response.main.temp - 273) + 32).toFixed(2)} degrees.`);
-      });
-    }
+    let city = $('#location').val();
+    clearFields();
+    makeApiCall(city);
   });
 });
+//IIFE
+// $(document).ready(function() {
+//   $('#weatherLocation').click(function() {
+//     let city = $('#location').val();
+//     clearFields();
+//     (async function() {
+//       const response = await WeatherService.getWeather(city);
+//       getElements(response);
+//     })();  
+//   });
+// });
