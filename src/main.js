@@ -20,27 +20,13 @@ function getElements(response) {
   }
 }
 
-async function makeApiCall(city) {
-  const response = await WeatherService.getWeather(city);
-  getElements(response);
-}
-
-
 $(document).ready(function() {
   $('#weatherLocation').click(function() {
     let city = $('#location').val();
     clearFields();
-    makeApiCall(city);
+    (async function() {
+      const response = await WeatherService.getWeather(city);
+      getElements(response);
+    })();  
   });
 });
-//IIFE
-// $(document).ready(function() {
-//   $('#weatherLocation').click(function() {
-//     let city = $('#location').val();
-//     clearFields();
-//     (async function() {
-//       const response = await WeatherService.getWeather(city);
-//       getElements(response);
-//     })();  
-//   });
-// });
